@@ -22,11 +22,13 @@ class ProductOrderDTO(BaseModel):
     name: str
     quantity: int
     sku: int
+    offer_id: str
 
 class ReceivedOrderDTO(BaseModel):
     posting_number: str
     status: str
     in_process_at: datetime     # Дата и время начала обработки отправления.
+    shipment_date: datetime
     products: List[ProductOrderDTO]
     financial_data: FinancialOrderDataDTO | None = None
 

@@ -26,11 +26,6 @@ class Orders(Base):
         nullable=False,
     )
 
-    seller_id: Mapped[int] = mapped_column(
-        Integer,
-        nullable=False,
-    )
-
     offer_id: Mapped[str] = mapped_column(
         String(255),
         nullable=False,
@@ -38,6 +33,11 @@ class Orders(Base):
 
     status: Mapped[str] = mapped_column(
         String(255),
+        nullable=False,
+    )
+
+    quantity: Mapped[int] = mapped_column(
+        Integer,
         nullable=False,
     )
 
@@ -87,16 +87,6 @@ class Orders(Base):
     )
 
     shipment_date: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True),
-        nullable=False,
-    )
-
-    delivery_date_begin: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True),
-        nullable=False,
-    )
-
-    delivery_date_end: Mapped[datetime] = mapped_column(
         DateTime(timezone=True),
         nullable=False,
     )

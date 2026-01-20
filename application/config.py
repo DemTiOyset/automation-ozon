@@ -5,6 +5,8 @@ class Settings(BaseSettings):
     DATABASE_URL: str
     CLIENT_ID: str
     API_KEY: str
+    GOOGLE_SHEET_ID: str
+    GOOGLE_SHEET_NAME: str
 
     model_config = SettingsConfigDict(
         env_file=".env",

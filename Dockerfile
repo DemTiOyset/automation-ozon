@@ -5,26 +5,29 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
 
 WORKDIR /app
 
-# системные зависимости (для сборки некоторых пакетов)
+# базовые пакеты, нужные для сборки некоторых зависимостей
 RUN apt-get update && apt-get install -y --no-install-recommends \
     build-essential \
     curl \
-    && rm -rf /var/lib/apt/lists/*
+  && rm -rf /var/lib/apt/lists/*
 
-# ставим uv (быстрый менеджер зависимостей)
+# uv как менеджер зависимостей
 RUN pip install --no-cache-dir uv
 
-# сначала копируем только файлы зависимостей (кэш Docker будет работать корректно)
+# сначала lock-файлы (чтобы работал docker cache)
 COPY pyproject.toml uv.lock ./
 
-# устанавливаем зависимости строго по lock
+# ставим зависимости строго по lock
 RUN uv sync --frozen --no-dev
 
-# копируем проект
+# копируем исходники
 COPY . .
+
+# создаем непривилегированного пользователя
+RUN useradd -m appuser && chown -R appuser:appuser /app
+USER appuser
 
 EXPOSE 8000
 
-# запускаем через uv (использует .venv внутри контейнера)
+# ВАЖНО: правильный модуль (у тебя FastAPI app в application/main.py)
 CMD ["uv", "run", "uvicorn", "application.main:app", "--host", "0.0.0.0", "--port", "8000"]
-

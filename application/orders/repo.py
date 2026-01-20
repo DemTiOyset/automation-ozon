@@ -1,8 +1,4 @@
-﻿from typing import TypeVar, Type, Generic, Mapping, Any
-
-from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select
-from sqlalchemy.orm import selectinload
+﻿from sqlalchemy import select
 
 from application.db import async_session_maker
 from application.orders.models.orders import Orders

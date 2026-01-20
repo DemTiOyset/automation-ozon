@@ -1,30 +1,25 @@
-from typing import Iterable, List
+from typing import List
 
-from application.orders.shemas.notification import OrderCreatedNotificationDTO, \
-    BaseOrderNotificationDTO, OrderCancelledNotificationDTO, OrderUpdatedStatusEnum, \
+from application.orders.shemas.notification import OrderCancelledNotificationDTO, OrderUpdatedStatusEnum, \
     OrderUpdatedShipmentDateNotificationDTO, OrderUpdatedStatusNotificationDTO, OrderUpdatedDeliveryDateNotificationDTO
-from application.orders.shemas.orders_from_market import FinancialOrderDataDTO, ReceivedOrderDTO
+from application.orders.shemas.orders_from_market import ReceivedOrderDTO
 from application.orders.shemas.orders import OrderDTO
 
 
 async def _transforming_order_creation_data(
-        notification: OrderCreatedNotificationDTO,
         order_data: ReceivedOrderDTO
 ) -> List[OrderDTO]:
 
-    last_event_time = notification.in_process_at
-    delivery_date_begin = notification.delivery_date_begin
-    delivery_date_end = notification.delivery_date_end
-    posting_number = notification.posting_number
-    seller_id = notification.seller_id
-    shipment_date = notification.shipment_date
+    last_event_time = order_data.in_process_at
+    posting_number = order_data.posting_number
+    shipment_date = order_data.shipment_date
+    status = order_data.status
 
     order_items: List[OrderDTO] = []
-    for product in notification.products:
+    for product in order_data.products:
         sku = product.sku
         offer_id = product.offer_id
         quantity = product.quantity
-        status = OrderUpdatedStatusEnum.posting_created.value
         name = product.name
 
         for financial_data_product in order_data.financial_data.products:
@@ -43,10 +38,7 @@ async def _transforming_order_creation_data(
                     "total_discount_percent": financial_data_product.total_discount_percent,
                     "total_discount_value": financial_data_product.total_discount_value,
                     "last_event_time": last_event_time,
-                    "delivery_date_begin": delivery_date_begin,
-                    "delivery_date_end": delivery_date_end,
                     "posting_number": posting_number,
-                    "seller_id": seller_id,
                     "status": status
                 })
                 order_items.append(order_item)

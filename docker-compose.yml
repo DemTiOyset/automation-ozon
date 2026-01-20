@@ -1,16 +1,19 @@
-﻿services:
+﻿version: '3.7'
+
+services:
   postgres:
-    image: postgres:16-alpine
+    image: postgres:15.2
+    restart: always
     environment:
-        POSTGRES_DB: ozon_1
-        POSTGRES_USER: postgres
-        POSTGRES_PASSWORD: 1234
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - POSTGRES_DB=${POSTGRES_DB}
     ports:
-      - "5432:5432"
+      - "5433:5432"
     volumes:
-      - pgdata:/var/lib/postgresql/data
+      - postgres_data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB"]
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB} -h 127.0.0.1 -p 5432"]
       interval: 5s
       timeout: 3s
       retries: 20
@@ -19,7 +22,6 @@
     build:
       context: .
       dockerfile: Dockerfile
-    container_name: gorbushka_migrate
     env_file:
       - .env
     depends_on:
@@ -29,18 +31,37 @@
     restart: "no"
 
   app:
+    ports:
+      - "8000:8000"
     build:
       context: .
       dockerfile: Dockerfile
-    container_name: gorbushka_ozon_app
     env_file:
       - .env
-    ports:
-      - "8000:8000"
     depends_on:
       migrate:
         condition: service_completed_successfully
+    # наружу в проде обычно не публикуем 8000, это делает reverse-proxy (Caddy/Nginx).
+    # Если тебе нужно локально — см. dev compose ниже.
     restart: unless-stopped
 
+    # Подключаем ключ сервис-аккаунта как файл (без коммита в git)
+    secrets:
+      - google_sa_json
+    environment:
+      # Путь внутри контейнера, под которым будет доступен секрет
+      GOOGLE_SA_JSON_PATH: /run/secrets/google_sa_json
+
+    healthcheck:
+      test: ["CMD-SHELL", "python -c \"import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/health').read()\""]
+      interval: 10s
+      timeout: 3s
+      retries: 12
+
+secrets:
+  google_sa_json:
+    # На сервере положишь файл сюда (пример): ./secrets/google-sa.json
+    file: ./secrets/google-sa.json
+
 volumes:
-  pgdata:
+  postgres_data:

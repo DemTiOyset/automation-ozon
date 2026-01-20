@@ -1,17 +1,13 @@
 ﻿from datetime import datetime
-from http.client import responses
-from typing import List, Optional
-
 from pydantic import BaseModel, ConfigDict, Field, AliasChoices
 
-from application.orders.shemas.enums import *
 
 class OrderDTO(BaseModel):
     """CreateOrderDTO"""
-    model_config = ConfigDict(use_enum_values=True, populate_by_name=True)
+    model_config = ConfigDict(use_enum_values=True, populate_by_name=True, from_attributes=True)
     name: str | None = None
     posting_number: str | None = None
-    seller_id: int | None = None
+    quantity: int | None = None
     commission_amount: float | None = None  # Размер комиссии за товар.
     commission_percent: int | None = None  # Процент комиссии.
     payout: float  # Выплата продавцу.
@@ -21,8 +17,6 @@ class OrderDTO(BaseModel):
     total_discount_value: float  # Сумма скидки.
     sku: int
     shipment_date: datetime | None = None
-    delivery_date_begin: datetime | None = None
-    delivery_date_end: datetime | None = None
     offer_id: str | None = None
     status: str | None = None
     last_event_time: datetime | None = Field(
@@ -32,3 +26,4 @@ class OrderDTO(BaseModel):
             "changed_state_date",
         ),
     )
+

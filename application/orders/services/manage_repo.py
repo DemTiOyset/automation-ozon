@@ -1,6 +1,6 @@
 ﻿from typing import List
 
-from sqlalchemy import select, update
+from sqlalchemy import update
 
 from application.db import async_session_maker
 from application.orders.models.orders import Orders
@@ -115,4 +115,7 @@ async def _update_order_delivery_date_items(
 def _dto_to_order(dto: OrderDTO) -> Orders:
     data = dto.model_dump(exclude_none=True)
     return Orders(**data)
+
+
+
 

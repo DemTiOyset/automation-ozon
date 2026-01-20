@@ -18,7 +18,6 @@ class BaseOrderNotificationDTO(BaseModel):
     seller_id: int
 
 class OrderCreatedItemsDTO(BaseModel):
-    name: str
     sku: int
     offer_id: str   # Идентификатор товара в системе продавца — артикул.
     quantity: int

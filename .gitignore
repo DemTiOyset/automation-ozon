@@ -1,3 +1,4 @@
 ﻿venv
 .env
 .idea
+application/google_secret.json

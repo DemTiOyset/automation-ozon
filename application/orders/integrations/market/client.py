@@ -1,6 +1,4 @@
-﻿import asyncio
-
-import httpx
+﻿import httpx
 
 from application.config import settings
 from application.orders.shemas.orders_from_market import ReceivedBusinessOrderDTO
@@ -33,4 +31,6 @@ async def get_order(
     order_data = parsed.result
 
     return order_data
+
+
 
