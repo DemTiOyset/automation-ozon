@@ -27,7 +27,7 @@ services:
     depends_on:
       postgres:
         condition: service_healthy
-    command: ["uv", "run", "alembic", "-c", "alembic.ini", "upgrade", "head"]
+    command: ["alembic", "-c", "alembic.ini", "upgrade", "head"]
     restart: "no"
 
   app:

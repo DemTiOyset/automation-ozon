@@ -6,6 +6,7 @@ from pydantic import BaseModel
 from application.orders.shemas.enums import *
 
 class NotificationTypeEnum(str, Enum):
+    TYPE_PING = "TYPE_PING" # Тестовое уведомление.
     TYPE_NEW_POSTING = "TYPE_NEW_POSTING"   # Новое отправление.
     TYPE_POSTING_CANCELLED = "TYPE_POSTING_CANCELLED"   # Отмена отправления.
     TYPE_STATE_CHANGED = "TYPE_STATE_CHANGED"   # Изменение статуса отправления.

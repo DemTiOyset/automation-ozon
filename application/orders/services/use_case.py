@@ -1,5 +1,4 @@
-﻿from pydantic import ValidationError
-from fastapi.responses import JSONResponse
+﻿from fastapi.responses import JSONResponse
 from fastapi import status
 
 from application.orders.integrations.google_sheets.repository import SheetsRepository
@@ -12,14 +11,9 @@ from application.orders.shemas.notification import OrderCreatedNotificationDTO
 
 
 async def handle_order_created(
-        unprocessed_notification: dict,
+        notification: OrderCreatedNotificationDTO,
         repo: SheetsRepository,
 ):
-    try:
-        notification = OrderCreatedNotificationDTO.model_validate(unprocessed_notification)
-    except ValidationError as e:
-        return {"message": "Vale parametr misssin"}
-
     try:
         order_from_market = await get_order(notification.posting_number)
         orders_from_db = \

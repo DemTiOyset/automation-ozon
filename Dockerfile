@@ -1,33 +1,30 @@
 ﻿FROM python:3.13-slim
 
 ENV PYTHONDONTWRITEBYTECODE=1 \
-    PYTHONUNBUFFERED=1
+    PYTHONUNBUFFERED=1 \
+    UV_PROJECT_ENVIRONMENT=/opt/venv
 
 WORKDIR /app
 
-# базовые пакеты, нужные для сборки некоторых зависимостей
 RUN apt-get update && apt-get install -y --no-install-recommends \
-    build-essential \
-    curl \
+    build-essential ca-certificates curl \
   && rm -rf /var/lib/apt/lists/*
 
-# uv как менеджер зависимостей
 RUN pip install --no-cache-dir uv
 
-# сначала lock-файлы (чтобы работал docker cache)
 COPY pyproject.toml uv.lock ./
 
-# ставим зависимости строго по lock
+# создаём окружение и синкаем зависимости в него
+RUN uv venv /opt/venv
 RUN uv sync --frozen --no-dev
 
-# копируем исходники
+# делаем venv “дефолтным” для всех команд (gunicorn, alembic, etc.)
+ENV PATH="/opt/venv/bin:$PATH"
+
 COPY . .
 
-# создаем непривилегированного пользователя
 RUN useradd -m appuser && chown -R appuser:appuser /app
 USER appuser
 
 EXPOSE 8000
-
-# ВАЖНО: правильный модуль (у тебя FastAPI app в application/main.py)
-CMD ["uv", "run", "uvicorn", "application.main:app", "--host", "0.0.0.0", "--port", "8000"]
+CMD ["python", "-m", "gunicorn", "application.main:app", "-k", "uvicorn.workers.UvicornWorker", "-b", "0.0.0.0:8000", "--workers", "2", "--timeout", "60"]
