@@ -21,6 +21,7 @@ WRITABLE_COLUMNS = {
     C.buyer_price,
     C.payout,
     C.ship_date,
+    C.status,
 
     # service
     C.key,
@@ -119,6 +120,7 @@ class SheetsRepository:
             C.buyer_price,
             C.payout,
             C.ship_date,
+            C.status,
 
             # служебные
             C.key,

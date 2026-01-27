@@ -16,6 +16,7 @@ class SheetColumns:
     buyer_price: str = "Цена для покупателя (со скидками)"
     payout: str = "Выплата продавцу"
     ship_date: str = "Дата отгрузки"
+    status: str = "Статус"
 
     # --- служебные ---
     key: str = "__key"

@@ -21,6 +21,7 @@ async def _create_order_items_in_sheets(
             C.ship_date_iso: item.shipment_date.date().isoformat(),
             C.name: item.name,
             C.buyer_price: item.customer_price,
+            C.status: item.status,
 
         }
         column = repo.upsert_item(values=values)

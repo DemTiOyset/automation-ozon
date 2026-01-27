@@ -1,4 +1,5 @@
-﻿from typing import List
+﻿from datetime import datetime
+from typing import List
 
 from sqlalchemy import update
 
@@ -44,7 +45,7 @@ async def _cancel_order_items(
 
 
 async def _update_order_shipment_date(
-        orders: Orders,
+        shipment_date: datetime,
 ) -> Orders:
 
     async with async_session_maker() as session:
@@ -52,10 +53,10 @@ async def _update_order_shipment_date(
             stmt = (
                 update(Orders)
                 .where(
-                    Orders.posting_number == orders.posting_number,
+                    Orders.posting_number == datetime,
                     Orders.is_returned.is_(False),
                 )
-                .values(shipment_date=orders.shipment_date)
+                .values(shipment_date=datetime)
                 .returning(Orders)
             )
 

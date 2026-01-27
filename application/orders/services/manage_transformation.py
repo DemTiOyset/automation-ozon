@@ -6,7 +6,7 @@ from application.orders.shemas.orders_from_market import ReceivedOrderDTO
 from application.orders.shemas.orders import OrderDTO
 
 
-async def _transforming_order_creation_data(
+async def _transforming_order_data(
         order_data: ReceivedOrderDTO
 ) -> List[OrderDTO]:
 

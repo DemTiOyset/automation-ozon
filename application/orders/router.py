@@ -4,8 +4,10 @@ from fastapi.responses import JSONResponse
 
 from application.dependencies.sheets import get_sheets_repo
 from application.orders.integrations.google_sheets.repository import SheetsRepository
-from application.orders.services.use_case import handle_order_created
-from application.orders.shemas.notification import OrderCreatedNotificationDTO, NotificationTypeEnum
+from application.orders.responses import Responses
+from application.orders.services.use_case import handle_order_created, handle_order_updated_shipment_date
+from application.orders.shemas.notification import OrderCreatedNotificationDTO, NotificationTypeEnum, \
+    OrderUpdatedShipmentDateNotificationDTO
 
 router = APIRouter(
     prefix="/webhook",
@@ -28,7 +30,18 @@ async def notification(
         )
 
     try:
-        notification = OrderCreatedNotificationDTO.model_validate(unprocessed_notification)
+
+        if unprocessed_notification.get("message_type") == NotificationTypeEnum.TYPE_NEW_POSTING:
+            notification = OrderCreatedNotificationDTO.model_validate(unprocessed_notification)
+            response = await handle_order_created(notification, repo)
+            return response
+
+        elif unprocessed_notification.get("message_type") == NotificationTypeEnum.TYPE_CUTOFF_DATE_CHANGED:
+            notification = OrderUpdatedShipmentDateNotificationDTO.model_validate(unprocessed_notification)
+            response = await handle_order_updated_shipment_date(notification, repo)
+            if response.get("message") == "There is no such entry in the database":
+                return await handle_order_created(notification, repo)
+
     except ValidationError as e:
         return JSONResponse(
             status_code=status.HTTP_400_BAD_REQUEST,
@@ -41,47 +54,7 @@ async def notification(
             },
         )
 
-    response = await handle_order_created(notification, repo)
-
-    if response.get("message") == "Order creation failed":
-        return JSONResponse(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            content={
-                "error": {
-                    "code": "ERROR_PARAMETER_VALUE_MISSED",
-                    "message": "Ошибка при записи в базу данных.",
-                    "details": None,
-                }
-            },
-        )
-
-    elif response.get("message") == "Order creation in sheet failed":
-        return JSONResponse(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            content={
-                "error": {
-                    "code": "ERROR_UNKNOWN",
-                    "message": "Ошибка записи в таблицу для отчетности.",
-                    "details": None,
-                }
-            },
-        )
-    elif response.get("message") == "Неизвестная ошибка":
-        return JSONResponse(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            content={
-                "error": {
-                    "code": "ERROR_UNKNOWN",
-                    "message": "Unknown error.",
-                    "details": response.get("error"),
-                }
-            },
-        )
-    elif response.get("message") == "Ok":
-        return JSONResponse(status_code=200, content={"result": True})
-
     return JSONResponse(status_code=200, content={"result": True})
-
 
 
 
