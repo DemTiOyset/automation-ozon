@@ -3,7 +3,7 @@ from typing import List
 
 from pydantic import BaseModel
 
-from application.orders.shemas.enums import *
+from application.shemas.enums import *
 
 class NotificationTypeEnum(str, Enum):
     TYPE_PING = "TYPE_PING" # Тестовое уведомление.

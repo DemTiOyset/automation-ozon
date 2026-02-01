@@ -46,8 +46,20 @@ class Responses:
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
                 content={
                     "error": {
-                        "code": "ERROR_UNKNOWN",
+                        "code": "ERROR_REQUEST_DUPLICATED",
                         "message": "Дата в сервисе равна обновленной дате в уведомлении.",
+                        "details": handler_response.get("error"),
+                    }
+                },
+            )
+
+        elif handler_response.get("message") == "New status entry equal to the entry in the database":
+            return JSONResponse(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                content={
+                    "error": {
+                        "code": "ERROR_REQUEST_DUPLICATED",
+                        "message": "Статус в сервисе равен обновленному статусу в уведомлении.",
                         "details": handler_response.get("error"),
                     }
                 },

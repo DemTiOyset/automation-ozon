@@ -1,12 +1,13 @@
 from typing import List
 
+from application.database.models.orders import Orders
 from application.orders.shemas.notification import OrderCancelledNotificationDTO, OrderUpdatedStatusEnum, \
     OrderUpdatedShipmentDateNotificationDTO, OrderUpdatedStatusNotificationDTO, OrderUpdatedDeliveryDateNotificationDTO
 from application.orders.shemas.orders_from_market import ReceivedOrderDTO
 from application.orders.shemas.orders import OrderDTO
 
 
-async def _transforming_order_data(
+async def _transforming_order_data_creation(
         order_data: ReceivedOrderDTO
 ) -> List[OrderDTO]:
 
@@ -124,3 +125,6 @@ async def _transforming_order_delivery_date_update(
 
 
 
+def _dto_to_order(dto: OrderDTO) -> Orders:
+    data = dto.model_dump(exclude_none=True)
+    return Orders(**data)

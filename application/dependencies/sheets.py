@@ -1,6 +1,6 @@
 ﻿from application.config import settings
-from application.orders.integrations.google_sheets.client import build_sheets_service
-from application.orders.integrations.google_sheets.repository import SheetsRepository
+from application.repositories.google_sheets.client import build_sheets_service
+from application.repositories.google_sheets.repository import SheetsRepository
 
 
 def get_sheets_repo() -> SheetsRepository:
