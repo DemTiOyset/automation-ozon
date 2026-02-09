@@ -1,3 +1,6 @@
+import sys
+import os
+
 import asyncio
 from logging.config import fileConfig
 
@@ -10,6 +13,9 @@ from sqlalchemy.ext.asyncio import async_engine_from_config
 from application.config import settings
 from application.database.db import Base
 from application.database.models.orders import Orders
+from application.database.models.order_items import OrderItems
+
+sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(__file__))))
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.

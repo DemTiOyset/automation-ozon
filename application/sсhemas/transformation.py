@@ -1,22 +1,35 @@
 from typing import List
 
+from application.database.models.order_items import OrderItems
 from application.database.models.orders import Orders
 from application.sсhemas.notification import OrderCancelledNotificationDTO, OrderUpdatedStatusEnum, \
     OrderUpdatedShipmentDateNotificationDTO, OrderUpdatedStatusNotificationDTO, OrderUpdatedDeliveryDateNotificationDTO
 from application.sсhemas.orders_from_market import ReceivedOrderDTO
-from application.sсhemas.orders import OrderDTO
+from application.sсhemas.orders import OrderDTO, OrderItemsDTO
 
 
 async def transforming_order_data_creation(
         order_data: ReceivedOrderDTO
-) -> List[OrderDTO]:
+) -> OrderDTO:
 
     last_event_time = order_data.in_process_at
     posting_number = order_data.posting_number
     shipment_date = order_data.shipment_date
     status = order_data.status
 
-    order_items: List[OrderDTO] = []
+    order = OrderDTO.model_validate({
+        "last_event_time": last_event_time,
+        "posting_number": posting_number,
+        "shipment_date": shipment_date,
+        "status": status
+    })
+
+    return order
+
+async def transforming_order_items_creation(
+        order_data: ReceivedOrderDTO
+) -> List[OrderItemsDTO]:
+    order_items: List[OrderItemsDTO] = []
     for product in order_data.products:
         sku = product.sku
         offer_id = product.offer_id
@@ -30,7 +43,6 @@ async def transforming_order_data_creation(
                     "offer_id": offer_id,
                     "quantity": quantity,
                     "sku": sku,
-                    "shipment_date": shipment_date,
                     "commission_amount": financial_data_product.commission_amount,
                     "commission_percent": financial_data_product.commission_percent,
                     "payout": financial_data_product.payout,
@@ -38,9 +50,6 @@ async def transforming_order_data_creation(
                     "customer_price": financial_data_product.customer_price,
                     "total_discount_percent": financial_data_product.total_discount_percent,
                     "total_discount_value": financial_data_product.total_discount_value,
-                    "last_event_time": last_event_time,
-                    "posting_number": posting_number,
-                    "status": status
                 })
                 order_items.append(order_item)
 
@@ -128,3 +137,7 @@ async def transforming_order_delivery_date_update(
 def dto_to_order(dto: OrderDTO) -> Orders:
     data = dto.model_dump(exclude_none=True)
     return Orders(**data)
+
+def dto_to_order_items(dto: OrderItemsDTO) -> OrderItems:
+    data = dto.model_dump(exclude_none=True)
+    return OrderItems(**data)

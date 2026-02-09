@@ -1,12 +1,12 @@
-﻿from __future__ import annotations
-
-from datetime import datetime
+﻿from datetime import datetime
+from decimal import Decimal
+from typing import List
 
 from sqlalchemy import (
     String, Integer, DateTime, Boolean,
-    Index, text, Float, BigInteger
+    Index, text, Float, BigInteger, ForeignKey, NUMERIC
 )
-from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from application.database.db import Base
 
@@ -14,70 +14,14 @@ from application.database.db import Base
 class Orders(Base):
     __tablename__ = "orders"
 
-    id: Mapped[int] = mapped_column(primary_key=True)
-
-    name: Mapped[str] = mapped_column(
-        String(255),
-        nullable=False,
-    )
-
     posting_number: Mapped[str] = mapped_column(
-        String(255),
-        nullable=False,
-    )
-
-    offer_id: Mapped[str] = mapped_column(
-        String(255),
-        nullable=False,
+        primary_key=True,
+        autoincrement=False,
+        unique=True,
     )
 
     status: Mapped[str] = mapped_column(
         String(255),
-        nullable=False,
-    )
-
-    quantity: Mapped[int] = mapped_column(
-        Integer,
-        nullable=False,
-    )
-
-    commission_amount: Mapped[float] = mapped_column(
-        Float,
-        nullable=False,
-    )
-
-    commission_percent: Mapped[int] = mapped_column(
-        Integer,
-        nullable=False,
-    )
-
-    payout: Mapped[float] = mapped_column(
-        Float,
-        nullable=False,
-    )
-
-    price: Mapped[float] = mapped_column(
-        Float,
-        nullable=False,
-    )
-
-    customer_price: Mapped[float] = mapped_column(
-        Float,
-        nullable=False,
-    )
-
-    total_discount_percent: Mapped[float] = mapped_column(
-        Float,
-        nullable=False,
-    )
-
-    total_discount_value: Mapped[float] = mapped_column(
-        Float,
-        nullable=False,
-    )
-
-    sku: Mapped[int] = mapped_column(
-        BigInteger,
         nullable=False,
     )
 
@@ -89,6 +33,7 @@ class Orders(Base):
     shipment_date: Mapped[datetime] = mapped_column(
         DateTime(timezone=True),
         nullable=False,
+        index=True
     )
 
     created_at: Mapped[datetime] = mapped_column(
@@ -109,13 +54,11 @@ class Orders(Base):
         default=False
     )
 
-    is_returned: Mapped[bool] = mapped_column(
-        Boolean,
-        nullable=False,
-        server_default=text("false"),
+    items: Mapped[List["OrderItems"]] = relationship(
+        "OrderItems",
+        back_populates="order",
+        cascade="all, delete-orphan",
+        lazy="raise",
     )
 
-    __table_args__ = (
-        Index("ix_order_lines_order", "posting_number"),
-    )
 

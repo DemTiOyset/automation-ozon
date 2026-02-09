@@ -1,6 +1,4 @@
-﻿version: '3.7'
-
-services:
+﻿services:
   postgres:
     image: postgres:15.2
     restart: always
@@ -27,11 +25,15 @@ services:
     depends_on:
       postgres:
         condition: service_healthy
+
+    volumes:
+      - ./application/database/migrations:/app/application/database/migrations
+      - ./alembic.ini:/app/alembic.ini
     command:
       [
         "alembic",
         "-c",
-        "application/database/alembic.ini",
+        "alembic.ini",
         "upgrade",
         "head"
       ]

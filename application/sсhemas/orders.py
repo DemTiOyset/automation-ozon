@@ -5,8 +5,21 @@ from pydantic import BaseModel, ConfigDict, Field, AliasChoices
 class OrderDTO(BaseModel):
     """CreateOrderDTO"""
     model_config = ConfigDict(use_enum_values=True, populate_by_name=True, from_attributes=True)
-    name: str | None = None
     posting_number: str | None = None
+    shipment_date: datetime | None = None
+    status: str | None = None
+    last_event_time: datetime | None = Field(
+        default=None,
+        validation_alias=AliasChoices(
+            "in_process_at",
+            "changed_state_date",
+        ),
+    )
+
+class OrderItemsDTO(BaseModel):
+    """CreateOrderItemDTO"""
+    model_config = ConfigDict(use_enum_values=True, populate_by_name=True, from_attributes=True)
+    name: str | None = None
     quantity: int | None = None
     commission_amount: float | None = None  # Размер комиссии за товар.
     commission_percent: int | None = None  # Процент комиссии.
@@ -16,14 +29,5 @@ class OrderDTO(BaseModel):
     total_discount_percent: float  # Процент скидки.
     total_discount_value: float  # Сумма скидки.
     sku: int
-    shipment_date: datetime | None = None
     offer_id: str | None = None
-    status: str | None = None
-    last_event_time: datetime | None = Field(
-        default=None,
-        validation_alias=AliasChoices(
-            "in_process_at",
-            "changed_state_date",
-        ),
-    )
 

@@ -4,28 +4,28 @@ from typing import List
 from sqlalchemy import select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from application.database.models.order_items import OrderItems
 from application.database.models.orders import Orders
 
-class OrderRepository:
-    def __init__(self, session: AsyncSession):
-        self._session = session
 
+class OrderRepository:
+    @staticmethod
     async def get_order_items_by_posting_number(
-            self,
+            session: AsyncSession,
             posting_number: str,
     ) -> Orders:
         stmt = (select(Orders)
                 .where(Orders.posting_number == posting_number)
                 )
 
-        result = await self._session.execute(stmt)
+        result = await session.execute(stmt)
         orders = result.scalars().all()
 
         return orders
 
-    
+    @staticmethod
     async def get_first_order_by_posting_number(
-            self,
+            session: AsyncSession,
             posting_number: str
     ):
         stmt = (select(Orders)
@@ -34,25 +34,27 @@ class OrderRepository:
             )
         )
 
-        result = await self._session.execute(stmt)
+        result = await session.execute(stmt)
         orders_shipment_date = result.scalars().first()
 
         return orders_shipment_date
 
-    
+    @staticmethod
     async def create_order_with_items(
-            self,
-            orders: List[Orders],
-    ) -> List[Orders]:
-        
-        self._session.add_all(orders)
-        await self._session.flush()
+            session: AsyncSession,
+            order: Orders,
+            order_items: List[OrderItems],
+    ) -> Orders:
+        order.items = order_items
 
-        return orders
+        session.add(order)
+        await session.flush()
 
-    
+        return order
+
+    @staticmethod
     async def cancel_order_items(
-            self,
+            session: AsyncSession,
             orders: Orders,
     ) -> Orders:
         
@@ -67,14 +69,14 @@ class OrderRepository:
             .returning(Orders)
         )
 
-        result = await self._session.execute(stmt)
+        result = await session.execute(stmt)
         updated_orders = result.scalars().all()
 
         return updated_orders
 
-    
+    @staticmethod
     async def update_order_shipment_date(
-            self,
+            session: AsyncSession,
             posting_number: str,
             shipment_date: datetime,
     ) -> Orders:
@@ -88,14 +90,14 @@ class OrderRepository:
             .returning(Orders)
         )
 
-        result = await self._session.execute(stmt)
+        result = await session.execute(stmt)
         updated_orders = result.scalars().all()
 
         return updated_orders
 
-    
+    @staticmethod
     async def update_order_status(
-            self,
+            session: AsyncSession,
             posting_number: str,
             status: str,
     ) -> Orders:
@@ -110,32 +112,21 @@ class OrderRepository:
             .returning(Orders)
         )
 
-        result = await self._session.execute(stmt)
+        result = await session.execute(stmt)
         orders = result.scalars().all()
 
         return orders
 
-    
-    async def update_order_delivery_date_items(
-            self,
-            orders: Orders,
-    ) -> Orders:
-        stmt = (
-            update(Orders)
-            .where(
-                Orders.posting_number == orders.posting_number,
-                Orders.is_returned.is_(False),
-            )
-            .values(
-                delivery_date_begin=orders.delivery_date_begin,
-                delivery_date_end=orders.delivery_date_end,
-            )
-            .returning(Orders)
-        )
 
-        result = await self._session.execute(stmt)
-        updated_orders = result.scalars().all()
 
-        return updated_orders
+    @staticmethod
+    async def mark_cancelled_items_in_order(
+            session: AsyncSession,
+            posting_number: str,
+            sku: int
+    ):
+        ...
+
+
 
 
