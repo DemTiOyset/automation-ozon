@@ -1,6 +1,4 @@
-﻿import asyncio
-
-import httpx
+﻿import httpx
 
 from application.config import settings
 from application.sсhemas.orders_from_market import ReceivedBusinessOrderDTO
@@ -18,14 +16,17 @@ async def get_order(
     }
 
     headers = {
-        "Client-ID": settings.CLIENT_ID,
+        "Client-Id": settings.CLIENT_ID,
         "Api-Key": settings.API_KEY,
         "Content-Type": "application/json",
     }
 
     async with httpx.AsyncClient(timeout=20.0) as client:
         resp = await client.post(url, headers=headers, json=body)
-        resp.raise_for_status()
+        if resp.status_code != 200:
+            print(f"Status: {resp.status_code}")
+            print(f"Response body: {resp.text}")
+            resp.raise_for_status()
         payload = resp.json()
 
     parsed = ReceivedBusinessOrderDTO.model_validate(payload)
@@ -33,5 +34,4 @@ async def get_order(
     order_data = parsed.result
 
     return order_data
-
 

@@ -20,7 +20,7 @@ router = APIRouter(
 )
 
 @router.post("/get_order")
-async def get_order_from_market(posting_number):
+async def get_order_from_market(posting_number: str):
     return await get_order(posting_number)
 
 @router.post("/notification")
